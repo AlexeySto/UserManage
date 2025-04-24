@@ -1,0 +1,42 @@
+services:
+  php-cli:
+    build:
+      context: ./docker/cli
+    volumes:
+      - ./code:/var/www/html
+
+  php-fpm:
+    build:
+      context: ./docker/fpm
+    volumes:
+      - ./code:/var/www/html
+    depends_on:
+      - database
+
+  nginx:
+    build:
+      context: ./docker/nginx
+    image: myapp/nginx
+    container_name: webserver
+    ports:
+      - "80:80"
+    volumes:
+      - ./code:/var/www/html
+    depends_on:
+      - php-fpm
+
+  database:
+    image: mysql:8.0
+    container_name: database
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./db_data:/var/lib/mysql
+
+volumes:
+  db_data:

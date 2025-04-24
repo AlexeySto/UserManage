@@ -1,0 +1,11 @@
+{
+    "name": "geekbrains/application1",
+    "autoload": {
+        "psr-4": {
+            "Alexey\\MyProdject\\": "src/"
+        }
+    },
+    "require": {
+        "twig/twig": "^3.0"
+    }
+}

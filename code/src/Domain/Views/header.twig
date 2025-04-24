@@ -1,0 +1,14 @@
+<header>
+    {% if not user_name %}
+        <h1>Добро пожаловать!</h1>
+        <div class="header_buttons">
+            <button onclick="location.href='/page/registration';">Регистрация</button>
+            <button onclick="location.href='/page/login';">Вход</button>
+        </div> 
+    {% else %}
+        <h1>{{ user_name }}, добро пожаловать!</h1>
+        <div class="header_buttons">
+            <button onclick="location.href='/auth/logout';">Выйти</button>
+        </div>
+    {% endif %}  
+</header>

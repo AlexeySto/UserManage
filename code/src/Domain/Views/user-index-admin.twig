@@ -1,0 +1,97 @@
+<p>Список пользователей в хранилище</p>
+
+<div class="table-responsive small">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Имя</th>
+                <th scope="col">Фамилия</th>
+                <th scope="col">День рождения</th>
+                <th scope="col">Изменить</th>
+                <th scope="col">Удалить</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.getUserId() }}</td>
+                <td>{{ user.getUserName() }}</td>
+                <td>{{ user.getUserLastName() }}</td>
+                <td>
+                    {% if user.getUserBirthdayToTimestemp() is not empty %}
+                        {{ user.getUserBirthdayToTimestemp() | date('d.m.Y') }}
+                    {% else %}
+                        <b>Не задан</b>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="col-md-3 text-end">
+                        <form action="/user/updateInfo" method="POST">
+                            <input type="hidden" name="id" value="{{ user.getUserId() }}">
+                            <input type="hidden" name="name" value="{{ user.getUserName() }}">
+                            <input type="hidden" name="lastname" value="{{ user.getUserLastname() }}">
+                            <input type="hidden" name="birthday" value="{{ user.getUserBirthdayToString() }}">
+                            <button type="submit" class="btn btn-primary">Изменить</button>
+                        </form>
+                    </div>
+                </td>
+                <td>
+                    <div class="col-md-3 text-end">
+                        <form action="/user/delete" method="POST" onsubmit="return confirm('Вы уверены, что хотите удалить пользователя?');">
+                            <input type="hidden" name="id" value="{{ user.getUserId() }}">
+                            <button type="submit" class="btn btn-danger">Удалить</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<button onclick="location.href='/page/registration';">Добавить пользователя</button>
+
+
+<script>
+    let maxId = $('.table tbody tr:last-child td:first-child').html() || 0;
+
+    setInterval(function () {
+        $.ajax({
+            method: 'POST',
+            url: "/user/indexRefresh/",
+            data: { 'maxId': maxId }
+        }).done(function (response) {
+            let users = JSON.parse(response); 
+            // Проходим по каждому пользователю в ответе
+            for (var k in users) {
+                let row = "<tr>";
+                row += "<td>" + users[k].id + "</td>";
+                maxId = users[k].id; // Обновляем maxId после получения данных
+
+                row += "<td>" + users[k].username + "</td>";
+                row += "<td>" + users[k].userlastname + "</td>";
+                row += "<td>" + users[k].userbirthday + "</td>";
+
+                // Форма для изменения
+                row += "<td><div class='col-md-3 text-end'>" +
+                       "<form action='/user/updateInfo' method='POST'>" +
+                       "<input type='hidden' name='id' value='" + users[k].id + "'>" +
+                       "<button type='submit' class='btn btn-primary'>Изменить</button>" +
+                       "</form></div></td>";
+
+                // Форма для удаления
+                row += "<td><div class='col-md-3 text-end'>" +
+                       "<form action='/user/delete' method='POST' onsubmit='return confirm(\"Вы уверены, что хотите удалить пользователя?\");'>" +
+                       "<input type='hidden' name='id' value='" + users[k].id + "'>" +
+                       "<button type='submit' class='btn btn-danger'>Удалить</button>" +
+                       "</form></div></td>";
+                
+                row += "</tr>";
+
+                $('.table tbody').append(row); // Добавляем строку в таблицу
+            }
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+            console.error("Ошибка при получении данных: ", textStatus, errorThrown);
+        });
+    }, 10000);
+</script>
